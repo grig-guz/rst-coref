@@ -1,0 +1,14 @@
+.idea/
+
+stanford*
+rst_discourse_treebank
+data/
+*.pyc
+__pycache__
+src/models/dep_parser
+/src/models/StageDP_Neural
+/src/nohup.out
+trials
+*.out
+*.pth
+*.pt
