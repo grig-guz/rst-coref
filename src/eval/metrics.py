@@ -1,5 +1,48 @@
 import numpy
 
+
+def convert_to_orig_parseval(rst_parseval):
+    orig_parseval = []
+    for constituent in rst_parseval:
+        # Not a leaf -> Leaves are removed in original parseval
+        # Constituent are in format [[BEGIN_IDX, END_IDX], NUCLEARITY, RELATION]
+        if not constituent[0][0] == constituent[0][1]:
+            orig_parseval.append([[constituent[0][0], constituent[0][1]], None, "rel2par:span"])
+    
+    # Add root node
+    max_edu = max([edu[0][1] for edu in rst_parseval])
+    orig_parseval.append([[1, max_edu], "Root", "rel2par:span"])
+    
+    # Add Nuclearity and Relation
+    # For each of the original parseval nodes left, assign them a nuclearity based on the children
+    # e.g for [[1,15], TBD, X] --> if [[1,10], Nucleus, span] and [[11,15], Satellite, Rel] --> [[1,15], N-S, Rel]
+    for orig_idx, orig_constituent in enumerate(orig_parseval):
+        # Iterate over all RST parseval constituents 
+        # and break once the current orig parseval constituent is reached,
+        # as there is nothing more left to do
+        for rst_constituent in rst_parseval:
+            # Break if the rst-parseval node equals the orig parseval node
+            if (rst_constituent[0][0] == orig_constituent[0][0] and
+                rst_constituent[0][1] == orig_constituent[0][1]):
+                break
+            # Continue to overwrite 'left' with the largest child-constituent (due to post-order-traversal)
+            elif (rst_constituent[0][0] == orig_constituent[0][0]):
+                left_nuc = rst_constituent[1][0]
+                left_rel = rst_constituent[2]
+            # Continue to overwrite 'right' with the largest child-constituent (due to post-order-traversal)
+            elif (rst_constituent[0][1] == orig_constituent[0][1]):
+                right_nuc = rst_constituent[1][0]
+                right_rel = rst_constituent[2]
+        # Assign the parent node with the combination of the child node nuclearities
+        orig_parseval[orig_idx][1] = left_nuc+"-"+right_nuc
+        if left_nuc == 'N':
+            rel = right_rel
+        else:
+            rel = left_rel
+        orig_parseval[orig_idx][2] = rel
+    return orig_parseval
+
+
 class Performance(object):
     def __init__(self, percision, recall, hit_num):
         self.percision = percision
@@ -8,7 +51,7 @@ class Performance(object):
 
 
 class Metrics(object):
-    def __init__(self, levels=['span', 'nuclearity', 'relation']):
+    def __init__(self, levels=['span', 'nuclearity', 'relation'], use_parseval=False):
         """ Initialization
 
         :type levels: list of string
@@ -23,6 +66,7 @@ class Metrics(object):
         self.hit_num_each_relation = {}
         self.pred_num_each_relation = {}
         self.gold_num_each_relation = {}
+        self.use_parseval = use_parseval
 
     def eval(self, goldtree, predtree):
         """ Evaluation performance on one pair of RST trees
@@ -35,6 +79,9 @@ class Metrics(object):
         """
         goldbrackets = goldtree.bracketing()
         predbrackets = predtree.bracketing()
+        if self.use_parseval:
+            goldbrackets = convert_to_orig_parseval(goldbrackets)
+            predbrackets = convert_to_orig_parseval(predbrackets)
         self.span_num += len(goldbrackets)
         for level in self.levels:
             if level == 'span':

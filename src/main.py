@@ -32,7 +32,8 @@ def parse_args():
     parser.add_argument('--model_type', help='baseline/coref_feats/multitask/multitask-plain - 0/1/2/3')
     parser.add_argument('--model_name', help='Name of the model')
     parser.add_argument('--pretrained_coref_path', help='Path to the pretrained coref model')
-
+    parser.add_argument('--use_parseval', help='Whether or not to use original Parseval instead of RST-Parseval', action='store_true')
+    
     return parser.parse_args()
 
 def get_train_loader(data_helper, config):
@@ -131,4 +132,4 @@ if __name__ == '__main__':
         print("Evaluating")
         with torch.no_grad():
             evaluator = Evaluator(parser, data_helper, config)
-            evaluator.eval_parser(None, path=args.eval_dir)
+            evaluator.eval_parser(None, path=args.eval_dir, args.use_parseval)

@@ -30,10 +30,10 @@ class Evaluator(object):
             for item in brackets:
                 fout.write(str(item) + '\n')
                 
-    def eval_parser(self, dev_data=None, path='./examples', save_preds=False):
+    def eval_parser(self, dev_data=None, path='./examples', save_preds=False, use_parseval=False):
         """ Test the parsing performance"""
         # Evaluation
-        met = Metrics(levels=['span', 'nuclearity', 'relation'])
+        met = Metrics(levels=['span', 'nuclearity', 'relation'], use_parseval=use_parseval)
         # ----------------------------------------
         # Read all files from the given path
         dev_data = [os.path.join(path, fname) for fname in os.listdir(path) if fname.endswith('.dis')]
@@ -82,6 +82,10 @@ class Evaluator(object):
             met.eval(gold_rst, pred_rst)
             
         print("Total cost: ", total_cost)
+        if use_parseval:
+            print("Reporting original Parseval metric.")
+        else:
+            print("Reporting RST Parseval metric.")
         met.report()
 
 def flatten(alist):

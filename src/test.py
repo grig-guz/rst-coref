@@ -108,13 +108,12 @@ def test_tree():
     for span in nonbinary_spans:
         assert span in spans
 
-def eval_trees(silver_tree, gold_tree, rst_span_perf, rst_nuc_perf, rst_rel_perf):
+def eval_trees(silver_tree, gold_tree, rst_span_perf, rst_nuc_perf, rst_rel_perf, use_parseval=False):
     # RST-Parseval
-    met = Metrics(levels=['span', 'nuclearity', 'relation'])
-    met.eval(silver_tree, gold_tree)
+    met = Metrics(levels=['span', 'nuclearity', 'relation'], use_parseval=use_parseval)
+    met.eval(gold_tree, silver_tree)
     assert met.span_perf.hit_num / met.span_num == rst_span_perf
     assert met.nuc_perf.hit_num / met.span_num == rst_nuc_perf
-    print(met.rela_perf.hit_num)
     assert met.rela_perf.hit_num / met.span_num == rst_rel_perf
     
 def test_eval():
@@ -144,7 +143,8 @@ def test_eval():
     silver_tree.back_prop(tree, gold_tree.doc)
     
     eval_trees(silver_tree, gold_tree, 1, 9/12, 8/12)  
-
+    eval_trees(silver_tree, gold_tree, 1, 4/6, 5/6, use_parseval=True)
+    
     sr_parser = ParsingState([], [])
     sr_parser.init(gold_tree.doc)
     silver_nuc = [(sh, None, None), (sh, None, None), (sh, None, None), (rd, ns, 'Elaboration'), 
@@ -160,6 +160,7 @@ def test_eval():
     silver_tree.assign_doc(gold_tree.doc)
     silver_tree.back_prop(tree, gold_tree.doc)
     eval_trees(silver_tree, gold_tree, 10/12, 7/12, 5/12)  
+    eval_trees(silver_tree, gold_tree, 4/6, 3/6, 3/6, use_parseval=True)
     
 test_doc()
 test_tree()
