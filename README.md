@@ -44,5 +44,5 @@ Similar to above:
  ```
 python main.py --eval --eval_dir ../data/data_dir/test_dir/ --model_name YOUR_MODEL_NAME --model_type NUM --pretrained_coref_path PATH
  ```
-
+You can add the flag ```--use_parseval``` to use standard Parseval metric instead of RST-Parseval.
 
