@@ -27,7 +27,7 @@ Next, run the following to generate the action/relation maps, coreference cluste
   ```
   python main.py --prepare --train_dir TRAIN_DIR --pretrained_coref_path PATH
   ```
-where ```--pretrained_coref_path``` specifies the path to pretrained coreference model, which can be downloaded from [here](TODO)
+where ```--pretrained_coref_path``` specifies the path to pretrained coreference model, which can be downloaded from [here](https://drive.google.com/file/d/1MDvxH3T1R_CC6NKc4tmX8eM_xD-hlBMS/view?usp=sharing)
   ### Training
 You need to specify model type:
 * 0 for the baseline model (no coreference)
